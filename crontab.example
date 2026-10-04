@@ -1,0 +1,31 @@
+# Contoh crontab untuk wifictl
+#
+# Pasang dengan:  crontab -e
+# atau tanpa edit manual:
+#     (crontab -l 2>/dev/null; cat crontab.example) | crontab -
+#
+# PENTING: cukup SATU baris di bawah. `schedule:run` dipanggil setiap menit
+# dan dia sendiri yang memutuskan task mana yang sudah jatuh tempo — pola
+# yang sama seperti `php artisan schedule:run`. Jadwal task ada di
+# .env, bukan di crontab.
+#
+# NODE harus ada di PATH. Cron mewarisi PATH yang sangat sedikit; kalau
+# Node dipasang lewat nvm, isi PATH di bawah atau pakai path absolut.
+#
+# Password AP TIDAK ditulis di crontab. Diamkan di .env.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+
+# Direktori repo. Lock, state, dan log default-nya di
+# ~/.local/state/wifictl (lihat .env kalau mau dipindah),
+# jadi cron dan terminal selalu berebut lock yang sama.
+WIFI=/home/fjr/Codes/XProject/wifi-control
+
+# Reconciliation blacklist + audit, semuanya dari satu perintah.
+* * * * * cd $WIFI && /usr/bin/node src/cli.js schedule:run
+
+# Kalau butuh mailed report, jalankan CLI langsung (bukan schedule:run):
+# 0 8 * * *   cd $WIFI && /usr/bin/node src/cli.js sync --quiet
+# 0 * * * *   cd $WIFI && /usr/bin/node src/cli.js list

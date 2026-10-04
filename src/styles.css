@@ -1,0 +1,79 @@
+@import 'tailwindcss';
+
+/* Dashboard ada di file statis yang dibaca lewat fetch(), bukan template,
+   jadi Tailwind harus tetap memindai folder ini secara eksplisit. */
+@source './views/**/*.html';
+
+/* Warna status tidak pakai palet bawaan supaya konsisten di light mode. */
+@theme {
+  --color-ok: oklch(0.62 0.15 155);
+  --color-warn: oklch(0.72 0.16 75);
+  --color-bad: oklch(0.58 0.2 25);
+}
+
+@layer base {
+  html {
+    font-family:
+      ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  body {
+    @apply bg-slate-100 text-slate-800 antialiased;
+  }
+  /* Tombol submit dalam form disables dipakai form loading state. */
+  button[disabled] {
+    @apply cursor-not-allowed opacity-60;
+  }
+}
+
+/* `@utility` (bukan `@layer components`) supaya class ini bisa dipakai
+   `@apply` di bawah dan tetap ikut di-purge Tailwind. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm
+    font-medium transition;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+  .card-title {
+    @apply flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 text-sm
+      font-semibold text-slate-700;
+  }
+  .btn-primary {
+    @apply btn bg-slate-900 text-white hover:bg-slate-700;
+  }
+  .btn-danger {
+    @apply btn bg-bad text-white hover:brightness-110;
+  }
+  .btn-ghost {
+    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+  }
+  .field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm
+      outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .th {
+    @apply px-4 py-2 text-left text-xs font-semibold tracking-wide text-slate-500 uppercase;
+  }
+  .td {
+    @apply px-4 py-2 font-mono text-sm whitespace-nowrap;
+  }
+}
+
+/* Baris tabel yang baru saja berubah, lalu memudar — supaya aksi dari
+   dashboard kelihatan efeknya tanpa perlu refresh. */
+@keyframes flash-ok {
+  from {
+    background-color: color-mix(in oklab, var(--color-ok) 25%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+.flash-ok {
+  animation: flash-ok 1.2s ease-out;
+}

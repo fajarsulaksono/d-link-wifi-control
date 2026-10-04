@@ -1,0 +1,32 @@
+# wlmac.sh memuat password admin AP secara plaintext.
+# JANGAN pernah commit file ini.
+wlmac.sh
+
+# .env memuat ADMIN_PASS. Salin .env.example lalu isi sendiri; yang aslinya
+# tidak boleh masuk repository. .env.example tetap di-commit.
+.env
+.env.*
+!.env.example
+
+# State runtime: lock, schedule-state.json, log
+*.log
+*.log.*
+*.cookie
+state/
+.local/
+
+# Berisi MAC address jaringan internal.
+# blacklist.txt sengaja TIDAK di-ignore: itu default yang perlu selalu ada.
+blacklist.local.txt
+
+# rules.json juga berisi MAC asli jaringan ini, jadi tidak ikut di-commit.
+# rules.json.example tetap di-commit sebagai template.
+rules.json
+
+# Node
+node_modules/
+.npm/
+
+# Python
+__pycache__/
+*.pyc

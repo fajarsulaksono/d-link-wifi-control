@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="id" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>wifictl — blacklist MAC</title>
+    <link rel="stylesheet" href="/tailwind.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>📶</text></svg>"
+    />
+  </head>
+  <body class="min-h-full">
+    <!-- Toast -->
+    <div
+      id="toasts"
+      class="pointer-events-none fixed top-4 right-4 z-50 flex w-80 flex-col gap-2"
+      aria-live="polite"
+    ></div>
+
+    <header class="border-b border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3">
+        <h1 class="text-lg font-semibold tracking-tight">wifictl</h1>
+        <span class="badge bg-slate-100 text-slate-600">blacklist MAC</span>
+
+        <span id="ap-host" class="badge bg-slate-100 text-slate-600">AP —</span>
+        <span id="conn" class="badge bg-slate-200 text-slate-600">memuat…</span>
+
+        <div class="ml-auto flex items-center gap-2">
+          <label class="flex items-center gap-1.5 text-xs text-slate-500 select-none">
+            <input id="auto" type="checkbox" checked class="accent-slate-900" />
+            auto-refresh 20s
+          </label>
+          <button id="refresh" class="btn-ghost">Muat ulang</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl space-y-4 px-4 py-5">
+      <!-- Statistik -->
+      <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div class="card p-4">
+          <p class="text-xs tracking-wide text-slate-500 uppercase">Diblokir</p>
+          <p id="s-blocked" class="mt-1 text-2xl font-semibold">—</p>
+        </div>
+        <div class="card p-4">
+          <p class="text-xs tracking-wide text-slate-500 uppercase">Client aktif</p>
+          <p id="s-clients" class="mt-1 text-2xl font-semibold">—</p>
+        </div>
+        <div class="card p-4">
+          <p class="text-xs tracking-wide text-slate-500 uppercase">Sync berikutnya</p>
+          <p id="s-next" class="mt-1 text-lg font-semibold">—</p>
+        </div>
+        <div class="card p-4">
+          <p class="text-xs tracking-wide text-slate-500 uppercase">Sync terakhir</p>
+          <p id="s-last" class="mt-1 text-lg font-semibold">—</p>
+        </div>
+      </section>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <!-- Blacklist -->
+        <section class="card">
+          <div class="card-title">
+            <span>Blacklist di AP</span>
+            <span id="bl-count" class="badge bg-slate-100 text-slate-600">0</span>
+          </div>
+          <form id="form-block" class="flex gap-2 border-b border-slate-200 p-3">
+            <input
+              id="mac-input"
+              class="field"
+              placeholder="aa:bb:cc:dd:ee:ff"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="btn-danger shrink-0" type="submit">Blokir</button>
+          </form>
+          <label
+            class="flex items-start gap-2 border-b border-slate-200 bg-slate-50 p-3 text-xs text-slate-600"
+            for="permanent"
+          >
+            <input id="permanent" class="mt-0.5 shrink-0" type="checkbox" />
+            <span>
+              <span class="font-medium text-slate-800">Permanen</span> — tulis ke
+              <code>blacklist.txt</code>. Tanpa ini blokirnya hilang lagi saat sync
+              berikutnya, karena sync memaksa daftar = file permanen + rule yang
+              sedang aktif.
+            </span>
+          </label>
+          <div class="max-h-80 overflow-auto">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-slate-50">
+                <tr>
+                  <th class="th">MAC</th>
+                  <th class="th text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="bl-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <p id="bl-empty" class="hidden p-6 text-center text-sm text-slate-400">Blacklist kosong.</p>
+        </section>
+
+        <!-- Clients -->
+        <section class="card">
+          <div class="card-title">
+            <span>Device terhubung</span>
+            <span id="cl-count" class="badge bg-slate-100 text-slate-600">0</span>
+          </div>
+          <div class="max-h-96 overflow-auto">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-slate-50">
+                <tr>
+                  <th class="th">MAC</th>
+                  <th class="th">IP</th>
+                  <th class="th">Hostname</th>
+                  <th class="th text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="cl-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <p id="cl-empty" class="hidden p-6 text-center text-sm text-slate-400">
+            Tidak ada client.
+          </p>
+        </section>
+      </div>
+
+      <!-- Sync -->
+      <section class="card">
+        <div class="card-title">
+          <span>Sinkronisasi desired-state</span>
+          <span class="text-xs font-normal text-slate-400">
+            file = sumber kebenaran; MAC di AP yang tidak ada di file dilepas
+          </span>
+        </div>
+        <form id="form-sync" class="flex flex-wrap items-end gap-3 p-4">
+          <label class="min-w-64 flex-1">
+            <span class="mb-1 block text-xs text-slate-500">File blacklist</span>
+            <input id="sync-file" class="field" spellcheck="false" />
+          </label>
+          <label class="flex items-center gap-1.5 pb-2 text-sm text-slate-600 select-none">
+            <input id="sync-dry" type="checkbox" class="accent-slate-900" />
+            dry-run
+          </label>
+          <button class="btn-primary" type="submit">Jalankan sync</button>
+        </form>
+        <pre
+          id="sync-out"
+          class="hidden max-h-40 overflow-auto border-t border-slate-200 bg-slate-50 p-3 font-mono text-xs whitespace-pre-wrap"
+        ></pre>
+      </section>
+
+      <!-- Jadwal -->
+      <section class="card">
+        <div class="card-title">
+          <span>Jadwal (schedule:run)</span>
+          <button id="run-all" class="btn-ghost">Jalankan semua</button>
+        </div>
+        <div id="task-list" class="divide-y divide-slate-100"></div>
+      </section>
+
+      <!-- Rule berbasis jam -->
+      <section class="card">
+        <div class="card-title">
+          <span>Rule blokir per jam</span>
+          <span id="rules-now" class="text-xs font-normal text-slate-400">—</span>
+        </div>
+        <p class="mb-3 text-xs text-slate-500">
+          Dari <code id="rules-file" class="font-mono">rules.json</code>. Edit file itu (atau
+          <code class="font-mono">wifictl rules add</code>) untuk menambah, mengurangi, dan
+          mengubah jam — perubahan langsung dipakai pada tick berikutnya.
+        </p>
+        <div id="rules-list" class="divide-y divide-slate-100"></div>
+      </section>
+
+      <!-- Log -->
+      <section class="card">
+        <div class="card-title">
+          <span>Log</span>
+          <span id="log-file" class="text-xs font-normal text-slate-400">—</span>
+        </div>
+        <pre
+          id="log"
+          class="max-h-72 overflow-auto bg-slate-900 p-3 font-mono text-xs leading-relaxed text-slate-100"
+        ></pre>
+      </section>
+    </main>
+
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>

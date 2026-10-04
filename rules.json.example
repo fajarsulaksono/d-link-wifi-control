@@ -1,0 +1,27 @@
+{
+  "rules": [
+    {
+      "id": "istirahat",
+      "name": "Jam istirahat",
+      "macs": ["aa:bb:cc:dd:ee:ff", "11:22:33:44:55:66"],
+      "windows": [
+        { "start": "12:00", "end": "13:00" },
+        { "start": "15:00", "end": "16:00" },
+        { "start": "17:30", "end": "18:30" }
+      ]
+    },
+    {
+      "id": "malam-work",
+      "name": "Hanya hari kerja, melewati tengah malam",
+      "macs": ["de:ad:be:ef:00:01"],
+      "windows": [{ "start": "23:00", "end": "01:00", "days": ["mon", "tue", "wed", "thu", "fri"] }]
+    },
+    {
+      "id": "nonaktif",
+      "name": "Contoh rule yang dimatikan",
+      "enabled": false,
+      "macs": ["99:88:77:66:55:44"],
+      "windows": [{ "start": "00:00", "end": "24:00" }]
+    }
+  ]
+}

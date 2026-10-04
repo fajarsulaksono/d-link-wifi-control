@@ -1,0 +1,31 @@
+{
+  "name": "wifictl",
+  "version": "2.0.0",
+  "description": "Kontrol blacklist MAC pada Access Point D-Link DIR-612F (panel WL-Router): CLI, scheduler, dan HTTP API",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "wifictl": "./src/cli.js"
+  },
+  "scripts": {
+    "wifictl": "node src/cli.js",
+    "serve": "node src/cli.js serve",
+    "build:css": "tailwindcss -i src/styles.css -o public/tailwind.css --minify",
+    "dev:css": "tailwindcss -i src/styles.css -o public/tailwind.css --watch",
+    "start": "npm run build:css && node src/cli.js serve",
+    "test": "node --test \"tests/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=20.12.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "croner": "^9.0.0",
+    "express": "^4.21.2",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
