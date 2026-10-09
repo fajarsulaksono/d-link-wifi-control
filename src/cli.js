@@ -121,6 +121,28 @@ common(
 
 common(
   program
+    .command('limit')
+    .description('set speed limit (KB/s) for a client')
+    .argument('<mac>', 'MAC address')
+    .option('--down <kbps>', 'download limit in KB/s', (v) => Number(v))
+    .option('--up <kbps>', 'upload limit in KB/s', (v) => Number(v))
+    .option('-n, --dry-run', 'show actions without executing'),
+).action(
+  action(async (ctx, cmd, [mac]) => {
+    const r = opts(cmd);
+    const down = r.down ?? 0;
+    const up = r.up ?? 0;
+    const result = await ctx.service.clientLimit(mac, { downLimit: down, upLimit: up, dryRun: r.dryRun });
+    if (r.json) out(JSON.stringify(result, null, 2));
+    else {
+      const dr = result.dryRun ? ' (dry-run)' : '';
+      out(`Limit set${dr}: ${result.mac} down=${result.downLimit}KB/s up=${result.upLimit}KB/s`);
+    }
+  }),
+);
+
+common(
+  program
     .command('sync')
     .description('reconcile AP blacklist with file contents (file = single source of truth)')
     .argument('[file]', 'blacklist file', (v) => path.resolve(v))

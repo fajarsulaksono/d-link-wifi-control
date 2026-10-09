@@ -64,9 +64,23 @@ export class Service {
         ip: e.ip ?? null,
         hostname: e.hostname ?? null,
         upSeconds: e.time ?? null,
+        downLimit: e.down_limit ?? null,
+        upLimit: e.up_limit ?? null,
+        downSpeed: e.down_speed ?? null,
+        upSpeed: e.up_speed ?? null,
       })),
       count: list.length,
     };
+  }
+
+  async clientLimit(mac, { downLimit, upLimit, dryRun } = {}) {
+    const macs = this.#parseInput([mac]);
+    const result = await this.client.setSpeedLimit(macs[0], {
+      downLimit,
+      upLimit,
+      dryRun: Boolean(dryRun),
+    });
+    return result;
   }
 
   /** Hold lock during write operations to avoid undoing each other. */

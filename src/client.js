@@ -278,4 +278,35 @@ export class RouterClient {
       return asRowList(data, '/associated_devs');
     });
   }
+
+  async setSpeedLimit(mac, { downLimit = 0, upLimit = 0, dryRun = false } = {}) {
+    const macNorm = String(mac ?? '').toLowerCase();
+    if (dryRun) {
+      this.logger?.info(`[dry-run] set speed limit ${macNorm}: down=${downLimit}kbps up=${upLimit}kbps`);
+      return { mac: macNorm, downLimit, upLimit, dryRun: true };
+    }
+
+    return this.withSession(async () => {
+      let data;
+      try {
+        data = await this.#request('POST', '/dev_speed_limit', {
+          mac: macNorm,
+          uplimit: Number(upLimit) || 0,
+          downlimit: Number(downLimit) || 0,
+        });
+      } catch (err) {
+        if (err.sessionLost) throw err;
+        throw networkError(`Failed to contact AP during set speed limit ${macNorm}`, { cause: err });
+      }
+
+      if (String(data?.result) === '0') {
+        this.logger?.info(`OK set speed limit ${macNorm}: down=${downLimit}kbps up=${upLimit}kbps`);
+        return { mac: macNorm, downLimit, upLimit };
+      }
+
+      throw apiError(
+        `Failed to set speed limit ${macNorm}: result=${data?.result ?? 'absent'} msg=${data?.msg ?? 'unknown'}`,
+      );
+    });
+  }
 }

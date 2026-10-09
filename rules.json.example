@@ -22,6 +22,14 @@
       "enabled": false,
       "macs": ["99:88:77:66:55:44"],
       "windows": [{ "start": "00:00", "end": "24:00" }]
+    },
+    {
+      "id": "speed-limit-malam",
+      "name": "Batasi kecepatan malam hari (contoh)",
+      "enabled": false,
+      "macs": ["aa:bb:cc:dd:ee:ff"],
+      "windows": [{ "start": "22:00", "end": "06:00" }],
+      "limit": { "down": 512, "up": 128 }
     }
   ]
 }
